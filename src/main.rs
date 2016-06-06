@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::iter::Iterator;
 
 pub trait Graph
     where Self: for<'graph> GraphPredecessors<'graph, Item=<Self as Graph>::Node>,
@@ -102,12 +103,16 @@ impl Graph for SuperMir {
     fn predecessors<'graph>(&'graph self, node: usize)
                             -> <Self as GraphPredecessors<'graph>>::Iter
     {
-        PredIter { idx: 0, data: &self.edges, target: node }
+        //PredIter { idx: 0, data: &self.edges, target: node }
+        self.edges.into_iter().filter(|&(from, to)| {to == node })
+        .map(|(from, to)| { from })
     }
     fn successors<'graph>(&'graph self, node: usize)
                             -> <Self as GraphSuccessors<'graph>>::Iter
     {
-        SuccIter { idx: 0, data: &self.edges, target: node }
+        //SuccIter { idx: 0, data: &self.edges, target: node }
+        self.edges.into_iter().filter(|&(from, to)| {from == node })
+        .map(|(_, to)| { to })
     }
 }
 
@@ -122,12 +127,17 @@ impl SuperMir {
 
 impl<'g> GraphPredecessors<'g> for SuperMir {
     type Item = usize;
-    type Iter = PredIter<'g>;
+    //type Iter = PredIter<'g>;
+    //type Iter = std::vec<(usize,usize)>::Iterator;
+    //type Iter = std::iter::Iterator;
+    type Iter = std::iter::Iterator<vec<(usize,usize)>>;
 }
 
 impl<'g>  GraphSuccessors<'g> for SuperMir {
-   type Item = usize;
-   type Iter = SuccIter<'g>;
+    type Item = usize;
+    //type Iter = SuccIter<'g>;
+    //type Iter = std::vec<(usize,usize)>::Iterator;
+    type Iter = std::iter::Iterator<vec<(usize,usize)>>;
 }
 
 impl NodeIndex for usize {
